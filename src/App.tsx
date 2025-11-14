@@ -1,5 +1,4 @@
 import HeaderWithSettings from "./components/HeaderWithSettings";
-import { TextResultPage } from "./components/TextResultPage";
 import { VoiceUploadPage } from "./components/VoiceUploadPage";
 
 function App() {
@@ -7,7 +6,6 @@ function App() {
     <div>
       <HeaderWithSettings />;
       <VoiceUploadPage />
-      <TextResultPage text="Hello World!!!" />
     </div>
   );
 }
