@@ -1,13 +1,18 @@
-// --- Voice Upload Page ---
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Upload, FileAudio, Clipboard, Check } from "lucide-react";
+import { TextRewrite } from "./TextRewrite";
+import { useModel } from "@/context/ModelContext";
 
 export function VoiceUploadPage() {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [showFull, setShowFull] = useState(false);
+
+  const { model } = useModel();
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -28,12 +33,11 @@ export function VoiceUploadPage() {
     try {
       const apiKey = localStorage.getItem("GEMINI_API_KEY");
       if (!apiKey) {
-        setResult("❌ ابتدا API Key را در تنظیمات وارد کنید.");
+        setResult("❌ ابتدا API Key را وارد کنید.");
         setLoading(false);
         return;
       }
 
-      // تبدیل فایل صوتی به Base64
       const fileBase64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve((reader.result as string).split(",")[1]);
@@ -42,14 +46,13 @@ export function VoiceUploadPage() {
       });
 
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             contents: [
               {
-                role: "user",
                 parts: [
                   {
                     inlineData: {
@@ -68,19 +71,16 @@ export function VoiceUploadPage() {
       const data = await response.json();
       const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
-      setResult(
-        text ||
-          `❌ پاسخ معتبری از Gemini دریافت نشد. 
-        خطا کامل سرور:
-        ${JSON.stringify(data, null, 2)}
-        `
-      );
-    } catch (err) {
+      setResult(text || "❌ پاسخ معتبر نبود.");
+    } catch {
       setResult("❌ خطا در ارسال به Gemini");
     }
 
     setLoading(false);
   }
+
+  const preview =
+    result.length > 500 && !showFull ? result.slice(0, 500) + "..." : result;
 
   function copyText() {
     navigator.clipboard.writeText(result);
@@ -90,42 +90,34 @@ export function VoiceUploadPage() {
     <div className="p-4 space-y-4">
       {/* فایل ورودی */}
       <Card className="border shadow-sm">
-        <CardHeader className="font-semibold">آپلود فایل صوتی</CardHeader>
         <CardContent>
           <label
-            className={`flex flex-col items-center justify-center w-full h-32 border rounded-xl cursor-pointer transition
-            ${
+            htmlFor="file-upload"
+            className={`flex flex-col items-center justify-center w-full h-32 border rounded-xl cursor-pointer transition ${
               audioFile
                 ? "border-green-500 bg-green-50"
                 : "border-dashed hover:bg-muted/30"
             }`}
           >
-            <label
-              htmlFor="file-upload"
-              className="flex flex-col items-center justify-center w-full h-32 border border-dashed rounded-xl cursor-pointer hover:bg-muted/30 transition"
-            >
-              {audioFile ? (
-                <>
-                  <Check className="w-8 h-8 mb-2 text-green-600" />
-                  <span className="text-sm text-green-700">فایل انتخاب شد</span>
-                </>
-              ) : (
-                <>
-                  <Upload className="w-8 h-8 mb-2" />
-                  <span className="text-sm">
-                    برای انتخاب فایل صوتی کلیک کنید
-                  </span>
-                </>
-              )}
-            </label>
-
-            <input
-              id="file-upload"
-              type="file"
-              className="hidden"
-              onChange={handleFileSelect}
-            />
+            {audioFile ? (
+              <>
+                <Check className="w-8 h-8 mb-2 text-green-600" />
+                <span className="text-sm text-green-700">فایل انتخاب شد</span>
+              </>
+            ) : (
+              <>
+                <Upload className="w-8 h-8 mb-2" />
+                <span className="text-sm">برای انتخاب فایل صوتی کلیک کنید</span>
+              </>
+            )}
           </label>
+
+          <input
+            id="file-upload"
+            type="file"
+            className="hidden"
+            onChange={handleFileSelect}
+          />
 
           {audioFile && (
             <div className="mt-3 flex items-center gap-2 text-sm text-green-700">
@@ -150,29 +142,43 @@ export function VoiceUploadPage() {
           <CardHeader className="font-semibold">نتیجه تبدیل</CardHeader>
           <CardContent className="space-y-3">
             <div className="whitespace-pre-wrap p-3 rounded-md bg-muted text-sm">
-              {result}
+              {preview}
             </div>
 
+            {/* Load More */}
+            {result.length > 500 && (
+              <Button
+                className="w-full"
+                variant="outline"
+                onClick={() => setShowFull(!showFull)}
+              >
+                {showFull ? "نمایش کمتر" : "نمایش بیشتر"}
+              </Button>
+            )}
+
+            {/* Copy */}
             <Button
-              className="w-full relative overflow-hidden group"
+              className="w-full relative overflow-hidden"
               variant="secondary"
               onClick={() => {
                 copyText();
+
                 const toast = document.createElement("div");
                 toast.textContent = "✔️ کپی شد";
                 toast.className =
-                  "fixed bottom-5 left-1/2 -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg animate-fadeOut";
+                  "fixed bottom-5 left-1/2 -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg";
                 document.body.appendChild(toast);
                 setTimeout(() => toast.remove(), 1500);
               }}
             >
-              <span className="flex items-center justify-center">
-                <Clipboard className="w-4 h-4 mr-2" /> کپی متن
-              </span>
+              <Clipboard className="w-4 h-4 mr-2" /> کپی متن
             </Button>
           </CardContent>
         </Card>
       )}
+
+      {/* بازنویسی خودکار */}
+      {result.trim() && <TextRewrite text={result} />}
     </div>
   );
 }
