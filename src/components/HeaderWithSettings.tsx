@@ -9,6 +9,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { ModelSelector } from "./ModelSelector";
 
 export default function HeaderWithSettings() {
   const [open, setOpen] = useState(false);
@@ -34,9 +35,12 @@ export default function HeaderWithSettings() {
           <span>صدا‌ به‌ متن</span>
         </div>
 
-        <Button variant="ghost" size="icon" onClick={() => setOpen(true)}>
-          <Settings className="w-5 h-5" />
-        </Button>
+        <div className="flex items-center gap-x-3">
+          <Button variant="ghost" size="icon" onClick={() => setOpen(true)}>
+            <Settings className="w-5 h-5" />
+          </Button>
+          <ModelSelector />
+        </div>
       </header>
 
       {/* Settings Modal */}
