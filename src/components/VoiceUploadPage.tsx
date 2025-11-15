@@ -12,6 +12,12 @@ export function VoiceUploadPage() {
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (!file.type.startsWith("audio/")) {
+      alert("فقط فایل صوتی مجاز است.");
+      return;
+    }
+
     setAudioFile(file);
   }
 
@@ -99,18 +105,7 @@ export function VoiceUploadPage() {
                 <span className="text-sm">برای انتخاب فایل صوتی کلیک کنید</span>
               </>
             )}
-            <input
-              type="file"
-              accept="
-                audio/mpeg,
-                audio/mp3,
-                audio/wav,
-                audio/x-m4a,
-                audio/aac,
-                audio/*"
-              className="hidden"
-              onChange={handleFileSelect}
-            />
+            <input type="file" onChange={handleFileSelect} />
           </label>
 
           {audioFile && (
