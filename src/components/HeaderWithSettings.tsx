@@ -32,7 +32,6 @@ export default function HeaderWithSettings() {
       <header className="flex items-center justify-between p-4 border-b bg-background sticky top-0 z-50">
         <div className="flex items-center gap-2 text-lg font-semibold">
           <Mic className="w-5 h-5" />
-          <span>صدا‌ به‌ متن</span>
         </div>
 
         <div className="flex items-center gap-x-3">
