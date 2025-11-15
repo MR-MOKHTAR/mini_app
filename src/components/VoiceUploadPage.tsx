@@ -94,18 +94,32 @@ export function VoiceUploadPage() {
                 : "border-dashed hover:bg-muted/30"
             }`}
           >
-            {audioFile ? (
-              <>
-                <Check className="w-8 h-8 mb-2 text-green-600" />
-                <span className="text-sm text-green-700">فایل انتخاب شد</span>
-              </>
-            ) : (
-              <>
-                <Upload className="w-8 h-8 mb-2" />
-                <span className="text-sm">برای انتخاب فایل صوتی کلیک کنید</span>
-              </>
-            )}
-            <input type="file" onChange={handleFileSelect} />
+            <label
+              htmlFor="file-upload"
+              className="flex flex-col items-center justify-center w-full h-32 border border-dashed rounded-xl cursor-pointer hover:bg-muted/30 transition"
+            >
+              {audioFile ? (
+                <>
+                  <Check className="w-8 h-8 mb-2 text-green-600" />
+                  <span className="text-sm text-green-700">فایل انتخاب شد</span>
+                </>
+              ) : (
+                <>
+                  <Upload className="w-8 h-8 mb-2" />
+                  <span className="text-sm">
+                    برای انتخاب فایل صوتی کلیک کنید
+                  </span>
+                </>
+              )}
+            </label>
+
+            <input
+              id="file-upload"
+              type="file"
+              accept="audio/*"
+              className="hidden"
+              onChange={handleFileSelect}
+            />
           </label>
 
           {audioFile && (
