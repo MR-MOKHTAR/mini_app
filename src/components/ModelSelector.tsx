@@ -4,9 +4,9 @@ export function ModelSelector() {
   const { model, changeModel } = useModel();
 
   return (
-    <div className="flex items-center gap-2 bg-muted rounded-lg">
+    <div className="flex items-center gap-1 bg-muted rounded-lg">
       <select
-        className="border rounded-lg p-2 bg-white *:text-center"
+        className="border rounded-lg p-1.5 bg-white *:text-center"
         value={model}
         onChange={(e) => changeModel(e.target.value)}
       >
