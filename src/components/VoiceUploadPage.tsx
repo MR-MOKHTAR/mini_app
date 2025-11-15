@@ -26,7 +26,7 @@ export function VoiceUploadPage() {
     setLoading(true);
 
     try {
-      const apiKey = localStorage.getItem("gemini_api_key");
+      const apiKey = localStorage.getItem("GEMINI_API_KEY");
       if (!apiKey) {
         setResult("❌ ابتدا API Key را در تنظیمات وارد کنید.");
         setLoading(false);
