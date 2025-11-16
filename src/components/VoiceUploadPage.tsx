@@ -11,6 +11,7 @@ export function VoiceUploadPage() {
   const [loading, setLoading] = useState(false);
 
   const [showFull, setShowFull] = useState(false);
+  const [isRewrite, setIsRewrite] = useState(false);
 
   const { model } = useModel();
 
@@ -29,6 +30,10 @@ export function VoiceUploadPage() {
   async function sendToGemini() {
     if (!audioFile) return;
     setLoading(true);
+    setIsRewrite(false);
+    setResult("");
+    localStorage.removeItem("MAIN_TEXT");
+    localStorage.removeItem("REWRITE_TEXT");
 
     try {
       const apiKey = localStorage.getItem("GEMINI_API_KEY");
@@ -75,6 +80,7 @@ export function VoiceUploadPage() {
 
       if (text) {
         localStorage.setItem("MAIN_TEXT", text);
+        setIsRewrite(true);
       }
     } catch {
       setResult("❌ خطا در ارسال به Gemini");
@@ -189,7 +195,7 @@ export function VoiceUploadPage() {
       )}
 
       {/* بازنویسی خودکار */}
-      {result.trim() && <TextRewrite prompt={result} />}
+      {result.trim() && <TextRewrite prompt={result} isRewrite={isRewrite} />}
     </div>
   );
 }
