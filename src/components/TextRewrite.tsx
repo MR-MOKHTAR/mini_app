@@ -2,10 +2,22 @@ import { useEffect, useState } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
+import { useModel } from "@/context/ModelContext";
 
-export function TextRewrite({ text }: { text: string }) {
+const text = `
+    Rewrite the input text strictly in the same language as provided.
+    Do not translate the text.
+    Produce output only — no greetings, no explanations, no confirmations.
+    Rewrite the text with corrected spelling, fixed grammar, cleaned formatting, improved readability, proper paragraphing, and removal of redundant repeated words.
+    Do not add new information, and do not remove any information except correcting mistakes.
+    Output only the corrected rewritten text.
+    `;
+
+export function TextRewrite({ prompt }: { prompt: string }) {
   const [rewritten, setRewritten] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const { model } = useModel();
 
   async function rewrite() {
     setLoading(true);
@@ -19,7 +31,7 @@ export function TextRewrite({ text }: { text: string }) {
 
     try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -29,7 +41,7 @@ export function TextRewrite({ text }: { text: string }) {
                 parts: [
                   { text },
                   {
-                    text: "این متن را بازنویسی کن، تمیز کن، غلط‌ها را اصلاح کن، پاراگراف‌بندی کن و خوانایی را بهتر کن.",
+                    text: prompt,
                   },
                 ],
               },
