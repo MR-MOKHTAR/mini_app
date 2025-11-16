@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Upload, FileAudio, Clipboard, Check } from "lucide-react";
@@ -72,6 +72,10 @@ export function VoiceUploadPage() {
       const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
       setResult(text || "❌ پاسخ معتبر نبود.");
+
+      if (text) {
+        localStorage.setItem("MAIN_TEXT", text);
+      }
     } catch {
       setResult("❌ خطا در ارسال به Gemini");
     }
@@ -85,6 +89,13 @@ export function VoiceUploadPage() {
   function copyText() {
     navigator.clipboard.writeText(result);
   }
+
+  useEffect(() => {
+    const getManiText = localStorage.getItem("MAIN_TEXT");
+    if (getManiText) {
+      setResult(getManiText);
+    }
+  });
 
   return (
     <div className="p-4 space-y-4">
@@ -139,7 +150,7 @@ export function VoiceUploadPage() {
       {/* نتیجه */}
       {result && (
         <Card className="border shadow-sm">
-          <CardHeader className="font-semibold">نتیجه تبدیل</CardHeader>
+          <CardHeader className="font-semibold">متن تبدیل شده</CardHeader>
           <CardContent className="space-y-3">
             <div className="whitespace-pre-wrap p-3 rounded-md bg-muted text-sm">
               {preview}

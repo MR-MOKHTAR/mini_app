@@ -54,6 +54,10 @@ export function TextRewrite({ prompt }: { prompt: string }) {
       const fixed = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
       setRewritten(fixed || "❌ بازنویسی معتبر نبود.");
+
+      if (fixed) {
+        localStorage.setItem("REWRITE_TEXT", fixed);
+      }
     } catch {
       setRewritten("❌ خطا در بازنویسی متن.");
     }
@@ -63,8 +67,15 @@ export function TextRewrite({ prompt }: { prompt: string }) {
 
   // اجرای خودکار بعد از دریافت متن
   useEffect(() => {
-    if (text.trim().length > 0) rewrite();
+    if (prompt.trim().length > 0) rewrite();
   }, [text]);
+
+  useEffect(() => {
+    const rewriteText = localStorage.getItem("REWRITE_TEXT");
+    if (rewriteText) {
+      setRewritten(rewriteText);
+    }
+  });
 
   return (
     <Card className="border shadow-sm mt-4">
