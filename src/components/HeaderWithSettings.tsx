@@ -34,11 +34,11 @@ export default function HeaderWithSettings() {
           <Mic className="w-5 h-5" />
         </div>
 
-        <div className="flex items-center gap-x-3">
+        <div className="flex items-center gap-x-2">
+          <ModelSelector />
           <Button variant="ghost" size="icon" onClick={() => setOpen(true)}>
             <Settings className="w-5 h-5" />
           </Button>
-          <ModelSelector />
         </div>
       </header>
 

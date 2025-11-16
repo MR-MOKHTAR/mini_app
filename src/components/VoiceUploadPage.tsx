@@ -178,7 +178,7 @@ export function VoiceUploadPage() {
       )}
 
       {/* بازنویسی خودکار */}
-      {result.trim() && <TextRewrite text={result} />}
+      {result.trim() && <TextRewrite prompt={result} />}
     </div>
   );
 }
