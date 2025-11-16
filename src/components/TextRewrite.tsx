@@ -13,7 +13,12 @@ const text = `
     Output only the corrected rewritten text.
     `;
 
-export function TextRewrite({ prompt }: { prompt: string }) {
+type PropType = {
+  prompt: string;
+  isRewrite: boolean;
+};
+
+export function TextRewrite({ prompt, isRewrite }: PropType) {
   const [rewritten, setRewritten] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -67,8 +72,10 @@ export function TextRewrite({ prompt }: { prompt: string }) {
 
   // اجرای خودکار بعد از دریافت متن
   useEffect(() => {
-    if (prompt.trim().length > 0) rewrite();
-  }, [text]);
+    // if (prompt.trim().length > 0) rewrite();
+
+    if (isRewrite) rewrite();
+  }, [isRewrite]);
 
   useEffect(() => {
     const rewriteText = localStorage.getItem("REWRITE_TEXT");
