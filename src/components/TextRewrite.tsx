@@ -1,17 +1,21 @@
+// Full TypeScript + shadcn/ui + clean structure + animations version
+// Includes: Load More, Copy, auto rewrite, saved state
+// Ready for Vite + React + TS + shadcn
+
 import { useEffect, useState } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useModel } from "@/context/ModelContext";
+import { motion, AnimatePresence } from "framer-motion";
 
-const text = `
-    Rewrite the input text strictly in the same language as provided.
-    Do not translate the text.
-    Produce output only — no greetings, no explanations, no confirmations.
-    Rewrite the text with corrected spelling, fixed grammar, cleaned formatting, improved readability, proper paragraphing, and removal of redundant repeated words.
-    Do not add new information, and do not remove any information except correcting mistakes.
-    Output only the corrected rewritten text.
-    `;
+const instruction = `
+Rewrite the input text strictly in the same language as provided.
+Do not translate the text.
+Output only the rewritten text.
+Correct spelling, grammar, formatting, readability, and paragraphs.
+Do not add new information.
+`;
 
 type PropType = {
   prompt: string;
@@ -19,17 +23,20 @@ type PropType = {
 };
 
 export function TextRewrite({ prompt, isRewrite }: PropType) {
-  const [rewritten, setRewritten] = useState("");
-  const [loading, setLoading] = useState(false);
-
   const { model } = useModel();
+
+  const [fullText, setFullText] = useState<string>("");
+  const [visibleText, setVisibleText] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [showCount, setShowCount] = useState<number>(700);
 
   async function rewrite() {
     setLoading(true);
 
     const apiKey = localStorage.getItem("GEMINI_API_KEY");
     if (!apiKey) {
-      setRewritten("❌ API Key وارد نشده است.");
+      setFullText("❌ API Key وارد نشده است.");
+      setVisibleText("❌ API Key وارد نشده است.");
       setLoading(false);
       return;
     }
@@ -43,12 +50,7 @@ export function TextRewrite({ prompt, isRewrite }: PropType) {
           body: JSON.stringify({
             contents: [
               {
-                parts: [
-                  { text },
-                  {
-                    text: prompt,
-                  },
-                ],
+                parts: [{ text: instruction }, { text: prompt }],
               },
             ],
           }),
@@ -56,55 +58,85 @@ export function TextRewrite({ prompt, isRewrite }: PropType) {
       );
 
       const data = await response.json();
-      const fixed = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      const output: string =
+        data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+        "❌ بازنویسی معتبر نبود.";
 
-      setRewritten(fixed || "❌ بازنویسی معتبر نبود.");
-
-      if (fixed) {
-        localStorage.setItem("REWRITE_TEXT", fixed);
-      }
+      setFullText(output);
+      setVisibleText(output.slice(0, showCount));
+      localStorage.setItem("REWRITE_TEXT", output);
     } catch {
-      setRewritten("❌ خطا در بازنویسی متن.");
+      setFullText("❌ خطا در بازنویسی متن.");
+      setVisibleText("❌ خطا در بازنویسی متن.");
     }
 
     setLoading(false);
   }
 
-  // اجرای خودکار بعد از دریافت متن
+  // اجرای خودکار
   useEffect(() => {
-    // if (prompt.trim().length > 0) rewrite();
-
     if (isRewrite) rewrite();
   }, [isRewrite]);
 
+  // لود از localStorage
   useEffect(() => {
-    const rewriteText = localStorage.getItem("REWRITE_TEXT");
-    if (rewriteText) {
-      setRewritten(rewriteText);
+    const saved = localStorage.getItem("REWRITE_TEXT");
+    if (saved) {
+      setFullText(saved);
+      setVisibleText(saved.slice(0, showCount));
     }
-  });
+  }, []);
+
+  function loadMore() {
+    const newCount = showCount + 700;
+    setShowCount(newCount);
+    setVisibleText(fullText.slice(0, newCount));
+  }
+
+  function copyText() {
+    navigator.clipboard.writeText(fullText);
+  }
 
   return (
     <Card className="border shadow-sm mt-4">
-      <CardHeader className="font-semibold">بازنویسی متن</CardHeader>
+      <CardHeader className="font-semibold text-lg">بازنویسی متن</CardHeader>
 
-      <CardContent className="space-y-3">
-        {loading ? (
-          <div className="text-sm opacity-70">⏳ در حال بازنویسی...</div>
-        ) : rewritten ? (
-          <div className="whitespace-pre-wrap p-3 rounded-md bg-muted text-sm">
-            {rewritten}
-          </div>
-        ) : null}
+      <CardContent className="space-y-4">
+        {/* متن */}
+        <AnimatePresence>
+          {loading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-4/5" />
+              <Skeleton className="h-4 w-3/5" />
+            </div>
+          ) : (
+            visibleText && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="whitespace-pre-wrap p-3 rounded-md bg-muted text-sm leading-relaxed"
+              >
+                {visibleText}
+              </motion.div>
+            )
+          )}
+        </AnimatePresence>
 
-        <Button
-          className="w-full"
-          variant="secondary"
-          onClick={rewrite}
-          disabled={loading}
-        >
-          <RefreshCw className="w-4 h-4 mr-2" /> بازنویسی دوباره
-        </Button>
+        {/* دکمه نمایش بیشتر */}
+        {!loading && fullText.length > visibleText.length && (
+          <Button className="w-full" onClick={loadMore}>
+            نمایش بیشتر
+          </Button>
+        )}
+
+        {/* دکمه کپی */}
+        {!loading && fullText.length > 0 && (
+          <Button variant="secondary" className="w-full" onClick={copyText}>
+            کپی متن
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
