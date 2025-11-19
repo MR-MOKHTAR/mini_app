@@ -6,11 +6,11 @@ export function ModelSelector() {
   return (
     <div className="flex items-center gap-1 bg-muted rounded-lg">
       <select
-        className="border rounded-lg p-1.5 bg-white *:text-center"
+        className="border rounded-lg p-1.5 bg-white *:text-left"
         value={model}
         onChange={(e) => changeModel(e.target.value)}
       >
-        <option value="gemini-3-pro">Gemini 3 Pro</option>
+        <option value="gemini-3-pro-preview">Gemini 3.0 Pro</option>
         <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
         <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
         <option value="gemini-2.5-flash-lite">Gemini-2.5-flash-lite</option>
