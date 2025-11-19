@@ -10,7 +10,6 @@ export function ModelSelector() {
         value={model}
         onChange={(e) => changeModel(e.target.value)}
       >
-        <option value="gemini-3-pro-preview">Gemini 3.0 Pro</option>
         <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
         <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
         <option value="gemini-2.5-flash-lite">Gemini-2.5-flash-lite</option>
