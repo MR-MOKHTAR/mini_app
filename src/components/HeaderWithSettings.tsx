@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mic, Settings } from "lucide-react";
+import { Settings, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ModelSelector } from "./ModelSelector";
+import { Badge } from "./ui/badge";
 
 export default function HeaderWithSettings() {
   const [open, setOpen] = useState(false);
@@ -31,13 +32,15 @@ export default function HeaderWithSettings() {
       {/* Header */}
       <header className="flex items-center justify-between p-4 border-b bg-background sticky top-0 z-50">
         <div className="flex items-center gap-2 text-lg font-semibold">
-          <Mic className="w-5 h-5" />
+          <Button variant="outline" size="icon">
+            <Menu className="size-5" />
+          </Button>
         </div>
 
         <div className="flex items-center gap-x-2">
           <ModelSelector />
-          <Button variant="ghost" size="icon" onClick={() => setOpen(true)}>
-            <Settings className="w-5 h-5" />
+          <Button variant="outline" size="icon" onClick={() => setOpen(true)}>
+            <Settings className="size-5" />
           </Button>
         </div>
       </header>
@@ -46,25 +49,29 @@ export default function HeaderWithSettings() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="flex items-center gap-x-2">
               <span>تنظیم </span>
-              <span>API Key</span>
+              <Badge variant="outline" className="text-sm">
+                API Key
+              </Badge>
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-3 py-4">
-            <label className="text-sm">API Key:</label>
+          <div className="space-y-3 py-4 focus:outline-none focus:ring-0">
             <Input
               placeholder="کلید Gemini..."
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
+              className="outline-none focus:outline-none focus:ring-0"
             />
 
             {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
           </div>
 
           <DialogFooter>
-            <Button onClick={saveKey}>ذخیره</Button>
+            <Button onClick={saveKey} variant="default">
+              ذخیره
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
