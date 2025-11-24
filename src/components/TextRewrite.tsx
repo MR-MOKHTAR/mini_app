@@ -1,7 +1,3 @@
-// Full TypeScript + shadcn/ui + clean structure + animations version
-// Includes: Load More, Copy, auto rewrite, saved state
-// Ready for Vite + React + TS + shadcn
-
 import { useEffect, useState } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -133,7 +129,7 @@ export function TextRewrite({ prompt, isRewrite }: PropType) {
 
         {/* دکمه کپی */}
         {!loading && fullText.length > 0 && (
-          <Button variant="secondary" className="w-full" onClick={copyText}>
+          <Button variant="outline" className="w-full" onClick={copyText}>
             کپی متن
           </Button>
         )}
