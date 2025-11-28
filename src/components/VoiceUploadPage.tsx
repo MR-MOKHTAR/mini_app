@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Button, Card, Box, VStack } from "@chakra-ui/react";
 import { Upload, FileAudio, Clipboard, Check } from "lucide-react";
 import { TextRewrite } from "./TextRewrite";
 import { useModel } from "@/context/ModelContext";
@@ -107,8 +106,8 @@ export function VoiceUploadPage() {
   return (
     <div className="p-4 space-y-4">
       {/* فایل ورودی */}
-      <Card className="border shadow-sm">
-        <CardContent>
+      <Card.Root variant="outline">
+        <Card.Body>
           <label
             htmlFor="file-upload"
             className={`flex flex-col items-center justify-center w-full h-32 border rounded-xl cursor-pointer transition ${
@@ -151,48 +150,55 @@ export function VoiceUploadPage() {
           >
             {loading ? "در حال ارسال..." : "ارسال به Gemini"}
           </Button>
-        </CardContent>
-      </Card>
+        </Card.Body>
+      </Card.Root>
 
       {/* نتیجه */}
       {result && (
-        <Card className="border shadow-sm">
-          <CardHeader className="font-semibold">متن تبدیل شده</CardHeader>
-          <CardContent className="space-y-3">
-            <div className="whitespace-pre-wrap p-3 rounded-md bg-muted text-sm">
-              {preview}
-            </div>
-
-            {/* Load More */}
-            {result.length > 500 && (
-              <Button
-                className="w-full"
-                variant="outline"
-                onClick={() => setShowFull(!showFull)}
+        <Card.Root variant="outline">
+          <Card.Header>
+            <Card.Title>متن تبدیل شده</Card.Title>
+          </Card.Header>
+          <Card.Body>
+            <VStack gap="3" align="stretch">
+              <Box
+                className="whitespace-pre-wrap p-3 rounded-md bg-muted text-sm"
+                borderWidth="1px"
               >
-                {showFull ? "نمایش کمتر" : "نمایش بیشتر"}
+                {preview}
+              </Box>
+
+              {/* Load More */}
+              {result.length > 500 && (
+                <Button
+                  className="w-full"
+                  variant="outline"
+                  onClick={() => setShowFull(!showFull)}
+                >
+                  {showFull ? "نمایش کمتر" : "نمایش بیشتر"}
+                </Button>
+              )}
+
+              {/* Copy */}
+              <Button
+                className="w-full relative overflow-hidden"
+                variant="subtle"
+                onClick={() => {
+                  copyText();
+
+                  const toast = document.createElement("div");
+                  toast.textContent = "✔️ کپی شد";
+                  toast.className =
+                    "fixed bottom-5 left-1/2 -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg";
+                  document.body.appendChild(toast);
+                  setTimeout(() => toast.remove(), 1500);
+                }}
+              >
+                <Clipboard className="w-4 h-4 mr-2" /> کپی متن
               </Button>
-            )}
-
-            {/* Copy */}
-            <Button
-              className="w-full relative overflow-hidden"
-              variant="secondary"
-              onClick={() => {
-                copyText();
-
-                const toast = document.createElement("div");
-                toast.textContent = "✔️ کپی شد";
-                toast.className =
-                  "fixed bottom-5 left-1/2 -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg";
-                document.body.appendChild(toast);
-                setTimeout(() => toast.remove(), 1500);
-              }}
-            >
-              <Clipboard className="w-4 h-4 mr-2" /> کپی متن
-            </Button>
-          </CardContent>
-        </Card>
+            </VStack>
+          </Card.Body>
+        </Card.Root>
       )}
 
       {/* بازنویسی خودکار */}

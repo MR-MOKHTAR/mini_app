@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Card, Button, Skeleton, Box } from "@chakra-ui/react";
 import { useModel } from "@/context/ModelContext";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -94,18 +92,20 @@ export function TextRewrite({ prompt, isRewrite }: PropType) {
   }
 
   return (
-    <Card className="border shadow-sm mt-4">
-      <CardHeader className="font-semibold text-lg">بازنویسی متن</CardHeader>
+    <Card.Root variant="outline" mt="4">
+      <Card.Header>
+        <Card.Title>بازنویسی متن</Card.Title>
+      </Card.Header>
 
-      <CardContent className="space-y-4">
+      <Card.Body gap="4">
         {/* متن */}
         <AnimatePresence>
           {loading ? (
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-4/5" />
-              <Skeleton className="h-4 w-3/5" />
-            </div>
+            <Box spaceY="2">
+              <Skeleton height="4" width="full" />
+              <Skeleton height="4" width="4/5" />
+              <Skeleton height="4" width="3/5" />
+            </Box>
           ) : (
             visibleText && (
               <motion.div
@@ -133,7 +133,7 @@ export function TextRewrite({ prompt, isRewrite }: PropType) {
             کپی متن
           </Button>
         )}
-      </CardContent>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   );
 }

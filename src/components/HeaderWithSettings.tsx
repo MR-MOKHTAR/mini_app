@@ -1,25 +1,28 @@
+"use client";
+
 import { useState } from "react";
-import { Settings, Menu } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Settings, Menu as MenuIcon } from "lucide-react";
 import {
+  Button,
   Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+  Input,
+  IconButton,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
+
 import { ModelSelector } from "./ModelSelector";
-import { Badge } from "./ui/badge";
+import MenuBar from "./menubar/Menu";
 
 export default function HeaderWithSettings() {
   const [open, setOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [error, setError] = useState("");
 
   function saveKey() {
     if (!apiKey || apiKey.trim().length < 10) {
-      setError("کلید معتبر نیست. لطفاً یک API Key صحیح وارد کنید.");
+      setError("لطفاً یک API Key صحیح وارد کنید.");
       return;
     }
     localStorage.setItem("GEMINI_API_KEY", apiKey.trim());
@@ -30,51 +33,81 @@ export default function HeaderWithSettings() {
   return (
     <>
       {/* Header */}
-      <header className="flex items-center justify-between p-4 border-b bg-background sticky top-0 z-50">
-        <div className="flex items-center gap-2 text-lg font-semibold">
-          <Button variant="outline" size="icon">
-            <Menu className="size-5" />
-          </Button>
-        </div>
+      <header className="flex items-center justify-between p-4 border-b bg-background sticky top-0 z-50 backdrop-blur">
+        <IconButton
+          variant="surface"
+          colorPalette={"blue"}
+          size="sm"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
+          <MenuIcon className="size-5" />
+        </IconButton>
 
-        <div className="flex items-center gap-x-2">
+        <div className="flex items-center gap-2">
           <ModelSelector />
-          <Button variant="outline" size="icon" onClick={() => setOpen(true)}>
+          <IconButton
+            variant="surface"
+            colorPalette={"blue"}
+            size="sm"
+            onClick={() => setOpen(true)}
+          >
             <Settings className="size-5" />
-          </Button>
+          </IconButton>
         </div>
       </header>
 
-      {/* Settings Modal */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-x-2">
-              <span>تنظیم </span>
-              <Badge variant="outline" className="text-sm">
-                API Key
-              </Badge>
-            </DialogTitle>
-          </DialogHeader>
+      <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
+        <Dialog.Backdrop bg="blackAlpha.700" />
 
-          <div className="space-y-3 py-4 focus:outline-none focus:ring-0">
-            <Input
-              placeholder="کلید Gemini..."
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              className="outline-none focus:outline-none focus:ring-0"
-            />
+        <Dialog.Positioner zIndex={"popover"}>
+          <Dialog.Content
+            maxW={{ base: "xs", md: "sm" }}
+            p={{ base: "5", md: "6" }}
+            borderRadius="2xl"
+            boxShadow="2xl"
+            bg={{ base: "white", _dark: "gray.600" }}
+            zIndex="popover"
+            dir="rtl"
+          >
+            <Dialog.Header pb="2"></Dialog.Header>
 
-            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-          </div>
+            <Dialog.Body pt="4" pb="6">
+              <Stack gap="3">
+                <Input
+                  placeholder="کلید Gemini..."
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  size="md"
+                  variant="flushed"
+                  borderRadius="lg"
+                />
+                {error && (
+                  <Text color="red.500" fontSize="sm">
+                    {error}
+                  </Text>
+                )}
+              </Stack>
+            </Dialog.Body>
 
-          <DialogFooter>
-            <Button onClick={saveKey} variant="default">
-              ذخیره
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <Dialog.Footer pt="0">
+              <Button
+                colorScheme="blue"
+                variant="solid"
+                onClick={saveKey}
+                w="full"
+                size="lg"
+                borderRadius="lg"
+              >
+                ذخیره کلید
+              </Button>
+            </Dialog.Footer>
+
+            <Dialog.CloseTrigger />
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
+
+      {isMenuOpen && <MenuBar setIsMenuOpen={setIsMenuOpen} />}
     </>
   );
 }
