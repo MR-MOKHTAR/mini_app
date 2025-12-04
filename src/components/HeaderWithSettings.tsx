@@ -107,7 +107,7 @@ export default function HeaderWithSettings() {
         </Dialog.Positioner>
       </Dialog.Root>
 
-      {isMenuOpen && <MenuBar setIsMenuOpen={setIsMenuOpen} />}
+      <MenuBar open={isMenuOpen} setOpen={setIsMenuOpen} />
     </>
   );
 }
