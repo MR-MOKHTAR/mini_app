@@ -25,6 +25,7 @@ export function ModelSelector() {
       value={[model.value]}
       onValueChange={handleValueChange}
       size="sm"
+      minWidth="140px"
     >
       <Select.HiddenSelect />
       <Select.Control>
