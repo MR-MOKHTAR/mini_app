@@ -22,7 +22,7 @@ interface PropType {
 
 export default function MenuBar({ open, setOpen }: PropType) {
   return (
-    <Drawer.Root open={open} onOpenChange={(e) => setOpen(e.open)} size={"sm"}>
+    <Drawer.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
       <Drawer.Backdrop />
       <Drawer.Positioner>
         <Drawer.Content dir="rtl">
