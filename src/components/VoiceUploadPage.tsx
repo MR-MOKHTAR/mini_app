@@ -4,6 +4,26 @@ import { Upload, FileAudio, Clipboard, Check } from "lucide-react";
 import { TextRewrite } from "./TextRewrite";
 import { useModel } from "@/context/ModelContext";
 
+const transcriptionPrompt = `
+      You are an expert transcriber specializing in accurate speech-to-text conversion.
+
+      Your task is to transcribe the audio in its ORIGINAL LANGUAGE with "Clean Verbatim" rules:
+
+      ### RULES:
+      1. Transcribe exactly what is said in the ORIGINAL LANGUAGE
+      2. Remove filler words (e.g., "umm", "uh", "like", "you know") unless essential to meaning
+      3. Remove immediate repetitions and stutters (e.g., "I I went to to..." → "I went to...")
+      4. Correct obvious slips of the tongue based on context
+      5. Keep punctuation natural and accurate
+      6. Do NOT change sentence structure
+      7. Do NOT summarize or omit any meaningful content
+      8. Do NOT add information that wasn't spoken
+      9. Preserve all religious terminology, proper nouns, and technical terms exactly as spoken
+
+      ### OUTPUT:
+      Return ONLY the clean verbatim transcript as plain text. Do NOT add any commentary, explanations, or formatting.
+      `;
+
 export function VoiceUploadPage() {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [result, setResult] = useState("");
@@ -64,7 +84,7 @@ export function VoiceUploadPage() {
                       data: fileBase64,
                     },
                   },
-                  { text: "لطفاً این فایل صوتی را به متن تبدیل کن." },
+                  { text: transcriptionPrompt },
                 ],
               },
             ],

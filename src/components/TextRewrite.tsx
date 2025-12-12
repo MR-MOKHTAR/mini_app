@@ -3,14 +3,6 @@ import { Card, Button, Skeleton, Box } from "@chakra-ui/react";
 import { useModel } from "@/context/ModelContext";
 import { motion, AnimatePresence } from "framer-motion";
 
-const instruction = `
-Rewrite the input text strictly in the same language as provided.
-Do not translate the text.
-Output only the rewritten text.
-Correct spelling, grammar, formatting, readability, and paragraphs.
-Do not add new information.
-`;
-
 type PropType = {
   prompt: string;
   isRewrite: boolean;
@@ -26,6 +18,41 @@ export function TextRewrite({ prompt, isRewrite }: PropType) {
 
   async function rewrite() {
     setLoading(true);
+
+    const baseCorrectionPrompt = `
+         You are a linguistic corrector and an academic editor specialized in Islamic seminary texts,
+          including Fiqh, Usul, Kalam, and Rijal. You are fully proficient in both Arabic and Persian.
+
+          Your task is to transform the provided transcript — which may contain improvised or spoken language —
+          into a fully edited academic text while preserving *all* meaning.
+
+          ### Fundamental Rules:
+          1. **No summarization whatsoever.** Every idea and meaning in the original must remain.
+          2. **No adding new information.** Do not introduce content that is not present in the transcript.
+          3. **Output must be in the *same language as the input* (Arabic or Persian).**
+          4. **Preserve seminary terminology**, such as: الإشكال، المناط، التنقيح، الوجوه، الاحتمالات, and similar.
+          5. **Do not alter the scientific intention.** Only improve clarity, structure, and expression.
+
+          ### Your tasks:
+          1. Understand the meaning completely before editing.
+          2. Convert spoken-style text into formal academic written language.
+          3. Organize the output into coherent, well-structured paragraphs.
+          4. Correct linguistic and grammatical errors.
+          5. Remove unnecessary filler phrases and repetitions.
+          6. Improve clarity and style while preserving *every* meaning.
+
+          If the input is in Persian, the output MUST be in Persian.
+          If the input is in Arabic, the output MUST be in Arabic.
+          You are strictly forbidden from translating the text into another language.
+
+          ### Very important:
+          Return the corrected text **only**, with no explanations or comments.
+
+          ### Transcript:
+          ${prompt}
+
+          ### Output:
+          The corrected text only.`;
 
     const apiKey = localStorage.getItem("GEMINI_API_KEY");
     if (!apiKey) {
@@ -44,7 +71,7 @@ export function TextRewrite({ prompt, isRewrite }: PropType) {
           body: JSON.stringify({
             contents: [
               {
-                parts: [{ text: instruction }, { text: prompt }],
+                parts: [{ text: baseCorrectionPrompt }],
               },
             ],
           }),
