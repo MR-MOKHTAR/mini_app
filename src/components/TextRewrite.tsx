@@ -119,27 +119,27 @@ export function TextRewrite({ prompt, isRewrite }: PropType) {
   }
 
   return (
-    <Card.Root variant="outline" mt="4">
-      <Card.Header>
-        <Card.Title>بازنویسی متن</Card.Title>
+    <Card.Root variant="outline" className="mt-6 shadow-lg border-border/50">
+      <Card.Header className="pb-4">
+        <Card.Title className="text-lg font-semibold">بازنویسی متن</Card.Title>
       </Card.Header>
 
-      <Card.Body gap="4">
+      <Card.Body gap="4" className="pt-2">
         {/* متن */}
         <AnimatePresence>
           {loading ? (
-            <Box spaceY="2">
-              <Skeleton height="4" width="full" />
-              <Skeleton height="4" width="4/5" />
-              <Skeleton height="4" width="3/5" />
+            <Box className="space-y-3">
+              <Skeleton height="4" width="full" className="rounded-lg" />
+              <Skeleton height="4" width="4/5" className="rounded-lg" />
+              <Skeleton height="4" width="3/5" className="rounded-lg" />
             </Box>
           ) : (
             visibleText && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="whitespace-pre-wrap p-3 rounded-md bg-muted text-sm leading-relaxed"
+                className="whitespace-pre-wrap p-4 rounded-xl bg-muted/50 text-sm leading-relaxed border border-border/30 shadow-inner"
               >
                 {visibleText}
               </motion.div>
@@ -149,14 +149,22 @@ export function TextRewrite({ prompt, isRewrite }: PropType) {
 
         {/* دکمه نمایش بیشتر */}
         {!loading && fullText.length > visibleText.length && (
-          <Button className="w-full" onClick={loadMore}>
+          <Button
+            className="w-full h-11 rounded-xl border-2 hover:bg-accent/50 transition-colors"
+            variant="outline"
+            onClick={loadMore}
+          >
             نمایش بیشتر
           </Button>
         )}
 
         {/* دکمه کپی */}
         {!loading && fullText.length > 0 && (
-          <Button variant="outline" className="w-full" onClick={copyText}>
+          <Button
+            variant="outline"
+            className="w-full h-11 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 bg-secondary hover:bg-secondary/80"
+            onClick={copyText}
+          >
             کپی متن
           </Button>
         )}
