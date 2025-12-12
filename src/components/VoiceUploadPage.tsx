@@ -124,27 +124,31 @@ export function VoiceUploadPage() {
   });
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-4 space-y-6 max-w-md mx-auto">
       {/* فایل ورودی */}
-      <Card.Root variant="outline">
-        <Card.Body>
+      <Card.Root variant="outline" className="shadow-lg border-border/50">
+        <Card.Body className="p-6">
           <label
             htmlFor="file-upload"
-            className={`flex flex-col items-center justify-center w-full h-32 border rounded-xl cursor-pointer transition ${
+            className={`flex flex-col items-center justify-center w-full h-40 border-2 rounded-2xl cursor-pointer transition-all duration-300 ${
               audioFile
-                ? "border-green-500 bg-green-50"
-                : "border-dashed hover:bg-muted/30"
+                ? "border-green-400 bg-green-50/50 dark:bg-green-950/20 shadow-inner"
+                : "border-dashed border-border hover:border-primary/50 hover:bg-accent/20 hover:shadow-md"
             }`}
           >
             {audioFile ? (
               <>
-                <Check className="w-8 h-8 mb-2 text-green-600" />
-                <span className="text-sm text-green-700">فایل انتخاب شد</span>
+                <Check className="w-10 h-10 mb-3 text-green-500 animate-in fade-in duration-300" />
+                <span className="text-sm font-medium text-green-700 dark:text-green-400">
+                  فایل انتخاب شد
+                </span>
               </>
             ) : (
               <>
-                <Upload className="w-8 h-8 mb-2" />
-                <span className="text-sm">برای انتخاب فایل صوتی کلیک کنید</span>
+                <Upload className="w-10 h-10 mb-3 text-muted-foreground" />
+                <span className="text-sm font-medium text-center px-4">
+                  برای انتخاب فایل صوتی کلیک کنید
+                </span>
               </>
             )}
           </label>
@@ -157,14 +161,14 @@ export function VoiceUploadPage() {
           />
 
           {audioFile && (
-            <div className="mt-3 flex items-center gap-2 text-sm text-green-700">
-              <FileAudio className="w-4 h-4" />
-              {audioFile.name}
+            <div className="mt-4 flex items-center gap-3 text-sm bg-muted/50 p-3 rounded-xl">
+              <FileAudio className="w-5 h-5 text-primary" />
+              <span className="font-medium truncate">{audioFile.name}</span>
             </div>
           )}
 
           <Button
-            className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white"
+            className="w-full mt-6 h-12 text-base font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 bg-primary hover:bg-primary/90"
             onClick={sendToGemini}
             disabled={!audioFile || loading}
           >
@@ -175,23 +179,22 @@ export function VoiceUploadPage() {
 
       {/* نتیجه */}
       {result && (
-        <Card.Root variant="outline">
-          <Card.Header>
-            <Card.Title>متن تبدیل شده</Card.Title>
+        <Card.Root variant="outline" className="shadow-lg border-border/50">
+          <Card.Header className="pb-4">
+            <Card.Title className="text-lg font-semibold">
+              متن تبدیل شده
+            </Card.Title>
           </Card.Header>
-          <Card.Body>
-            <VStack gap="3" align="stretch">
-              <Box
-                className="whitespace-pre-wrap p-3 rounded-md bg-muted text-sm"
-                borderWidth="1px"
-              >
+          <Card.Body className="pt-2">
+            <VStack gap="4" align="stretch">
+              <Box className="whitespace-pre-wrap p-4 rounded-xl bg-muted/50 text-sm leading-relaxed border border-border/30 shadow-inner">
                 {preview}
               </Box>
 
               {/* Load More */}
               {result.length > 500 && (
                 <Button
-                  className="w-full"
+                  className="w-full h-11 rounded-xl border-2 hover:bg-accent/50 transition-colors"
                   variant="outline"
                   onClick={() => setShowFull(!showFull)}
                 >
@@ -201,7 +204,7 @@ export function VoiceUploadPage() {
 
               {/* Copy */}
               <Button
-                className="w-full relative overflow-hidden"
+                className="w-full h-11 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 bg-secondary hover:bg-secondary/80"
                 variant="subtle"
                 onClick={() => {
                   copyText();
@@ -209,12 +212,12 @@ export function VoiceUploadPage() {
                   const toast = document.createElement("div");
                   toast.textContent = "✔️ کپی شد";
                   toast.className =
-                    "fixed bottom-5 left-1/2 -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg";
+                    "fixed bottom-6 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-2xl shadow-xl font-medium animate-in fade-in slide-in-from-bottom-4 duration-300";
                   document.body.appendChild(toast);
-                  setTimeout(() => toast.remove(), 1500);
+                  setTimeout(() => toast.remove(), 2000);
                 }}
               >
-                <Clipboard className="w-4 h-4 mr-2" /> کپی متن
+                <Clipboard className="w-5 h-5 mr-2" /> کپی متن
               </Button>
             </VStack>
           </Card.Body>
