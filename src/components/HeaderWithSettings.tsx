@@ -12,7 +12,6 @@ import {
 } from "@chakra-ui/react";
 
 import { ModelSelector } from "./ModelSelector";
-import MenuBar from "./menubar/Menu";
 
 export default function HeaderWithSettings() {
   const [open, setOpen] = useState(false);
@@ -106,8 +105,6 @@ export default function HeaderWithSettings() {
           </Dialog.Content>
         </Dialog.Positioner>
       </Dialog.Root>
-
-      <MenuBar open={isMenuOpen} setOpen={setIsMenuOpen} />
     </>
   );
 }
