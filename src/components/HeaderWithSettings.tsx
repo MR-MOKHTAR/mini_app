@@ -27,6 +27,7 @@ export default function HeaderWithSettings() {
     localStorage.setItem("GEMINI_API_KEY", apiKey.trim());
     setError("");
     setOpen(false);
+    setApiKey("");
   }
 
   return (
