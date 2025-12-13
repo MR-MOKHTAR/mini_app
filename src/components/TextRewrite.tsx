@@ -64,7 +64,7 @@ export function TextRewrite({ prompt, isRewrite }: PropType) {
 
     try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model.value}:generateContent?key=${apiKey}`,
+        `/api/gemini?model=${model.value}&key=${apiKey}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
