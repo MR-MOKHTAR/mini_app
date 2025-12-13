@@ -70,7 +70,7 @@ export function VoiceUploadPage() {
       });
 
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${model.value}:generateContent?key=${apiKey}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -124,7 +124,7 @@ export function VoiceUploadPage() {
   });
 
   return (
-    <div className="p-4 space-y-6 max-w-md mx-auto">
+    <div className="p-4 space-y-6 w-full max-w-5xl mx-auto">
       {/* فایل ورودی */}
       <Card.Root variant="outline" className="shadow-lg border-border/50">
         <Card.Body className="p-6">
@@ -133,7 +133,7 @@ export function VoiceUploadPage() {
             className={`flex flex-col items-center justify-center w-full h-40 border-2 rounded-2xl cursor-pointer transition-all duration-300 ${
               audioFile
                 ? "border-green-400 bg-green-50/50 dark:bg-green-950/20 shadow-inner"
-                : "border-dashed border-border hover:border-primary/50 hover:bg-accent/20 hover:shadow-md"
+                : "border-dashed border-border active:border-primary/50 active:bg-accent/20 active:shadow-md"
             }`}
           >
             {audioFile ? (
@@ -168,7 +168,7 @@ export function VoiceUploadPage() {
           )}
 
           <Button
-            className="w-full mt-6 h-12 text-base font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 bg-primary hover:bg-primary/90"
+            className="w-full mt-6 h-12 text-base font-medium rounded-xl shadow-lg active:shadow-sm active:scale-[0.98] transition-all duration-200 bg-primary"
             onClick={sendToGemini}
             disabled={!audioFile || loading}
           >
@@ -194,7 +194,7 @@ export function VoiceUploadPage() {
               {/* Load More */}
               {result.length > 500 && (
                 <Button
-                  className="w-full h-11 rounded-xl border-2 hover:bg-accent/50 transition-colors"
+                  className="w-full h-11 rounded-xl border-2 active:bg-accent/50 transition-colors"
                   variant="outline"
                   onClick={() => setShowFull(!showFull)}
                 >
@@ -204,7 +204,7 @@ export function VoiceUploadPage() {
 
               {/* Copy */}
               <Button
-                className="w-full h-11 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 bg-secondary hover:bg-secondary/80"
+                className="w-full h-11 rounded-xl shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-200 bg-secondary"
                 variant="subtle"
                 onClick={() => {
                   copyText();

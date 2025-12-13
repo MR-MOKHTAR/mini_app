@@ -64,7 +64,7 @@ export function TextRewrite({ prompt, isRewrite }: PropType) {
 
     try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${model.value}:generateContent?key=${apiKey}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -150,22 +150,23 @@ export function TextRewrite({ prompt, isRewrite }: PropType) {
         {/* دکمه نمایش بیشتر */}
         {!loading && fullText.length > visibleText.length && (
           <Button
-            className="w-full h-11 rounded-xl border-2 hover:bg-accent/50 transition-colors"
+            className="w-full h-12 rounded-2xl border-2 border-primary/20 active:border-primary/50 bg-background active:bg-accent/30 text-primary font-medium transition-all duration-300 shadow-sm active:shadow-md"
             variant="outline"
             onClick={loadMore}
           >
-            نمایش بیشتر
+            نمایش بیشتر ({fullText.length - visibleText.length} کاراکتر مانده)
           </Button>
         )}
 
         {/* دکمه کپی */}
         {!loading && fullText.length > 0 && (
           <Button
-            variant="outline"
-            className="w-full h-11 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 bg-secondary hover:bg-secondary/80"
+            variant="surface"
+            colorPalette="green"
+            className="w-full h-12 rounded-2xl shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-300 font-bold text-base border border-green-200 dark:border-green-800"
             onClick={copyText}
           >
-            کپی متن
+            📋 کپی تمام متن
           </Button>
         )}
       </Card.Body>
