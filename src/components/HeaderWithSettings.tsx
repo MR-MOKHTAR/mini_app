@@ -33,25 +33,25 @@ export default function HeaderWithSettings() {
   return (
     <>
       {/* Header */}
-      <header className="flex items-center justify-between p-4 border-b border-border/50 bg-background/95 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+      <header className="flex items-center justify-between p-4 border-b border-border/50 bg-background/95 backdrop-blur-md sticky top-0 z-50 shadow-sm h-14 md:h-16">
         <IconButton
-          variant="ghost"
-          colorPalette="blue"
-          size="sm"
+          variant="surface"
+          colorPalette="gray"
+          size={{ base: "sm", md: "md" }}
+          className="rounded-xl shadow-sm border border-border/40 active:scale-95 transition-transform"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="hover:bg-accent/50 transition-colors"
         >
           <MenuIcon className="size-5" />
         </IconButton>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           <ModelSelector />
           <IconButton
-            variant="ghost"
-            colorPalette="blue"
-            size="sm"
+            variant="surface"
+            colorPalette="gray"
+            size={{ base: "sm", md: "md" }}
             onClick={() => setOpen(true)}
-            className="hover:bg-accent/50 transition-colors"
+            className="rounded-xl shadow-sm border border-border/40 active:scale-95 transition-transform"
           >
             <Settings className="size-5" />
           </IconButton>
