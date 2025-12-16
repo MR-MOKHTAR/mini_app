@@ -9,7 +9,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-
 export function ModelSelector() {
   const { model, changeModel } = useModel();
 
@@ -23,12 +22,14 @@ export function ModelSelector() {
         }
       }}
     >
-      <SelectTrigger className="min-w-[140px] md:min-w-[180px] max-w-[160px] md:max-w-[220px]">
-        <SelectValue placeholder="Select a model" />
+      <SelectTrigger className="min-w-[160px] md:min-w-[200px] max-w-[180px] md:max-w-[240px] font-medium">
+        <SelectValue placeholder="انتخاب مدل" />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
-          <SelectLabel>AI Models</SelectLabel>
+          <SelectLabel className="text-center font-semibold">
+            مدل‌های هوش مصنوعی
+          </SelectLabel>
           {AI_MODELS.map((item) => (
             <SelectItem key={item.value} value={item.value}>
               {item.label}
