@@ -48,9 +48,11 @@ export function VoiceUploadPage() {
 
   async function sendToGemini() {
     if (!audioFile) return;
+
     setLoading(true);
     setIsRewrite(false);
     setResult("");
+
     localStorage.removeItem("MAIN_TEXT");
     localStorage.removeItem("REWRITE_TEXT");
 
@@ -58,10 +60,10 @@ export function VoiceUploadPage() {
       const apiKey = localStorage.getItem("GEMINI_API_KEY");
       if (!apiKey) {
         setResult("❌ ابتدا API Key را وارد کنید.");
-        setLoading(false);
         return;
       }
 
+      // تبدیل فایل صوتی به base64 (بدون تغییر)
       const fileBase64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve((reader.result as string).split(",")[1]);
@@ -69,32 +71,44 @@ export function VoiceUploadPage() {
         reader.readAsDataURL(audioFile);
       });
 
-      const response = await fetch(
-        `/api/gemini?model=${model.value}&key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    inlineData: {
-                      mimeType: audioFile.type,
-                      data: fileBase64,
-                    },
+      // ⬅️ URL صحیح Gemini (مهم‌ترین تغییر)
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model.value}:generateContent?key=${apiKey}`;
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [
+                {
+                  inlineData: {
+                    mimeType: audioFile.type,
+                    data: fileBase64,
                   },
-                  { text: transcriptionPrompt },
-                ],
-              },
-            ],
-          }),
-        }
-      );
+                },
+                { text: transcriptionPrompt },
+              ],
+            },
+          ],
+        }),
+      });
+
+      if (!response.ok) {
+        const err = await response.text();
+        throw new Error(err);
+      }
 
       const data = await response.json();
-      console.log(data);
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      console.log("Gemini response:", data);
+
+      const text =
+        data?.candidates?.[0]?.content?.parts
+          ?.map((p: any) => p.text)
+          ?.join("") || "";
 
       setResult(text || "❌ پاسخ معتبر نبود.");
 
@@ -102,11 +116,12 @@ export function VoiceUploadPage() {
         localStorage.setItem("MAIN_TEXT", text);
         setIsRewrite(true);
       }
-    } catch {
+    } catch (err) {
+      console.error(err);
       setResult("❌ خطا در ارسال به Gemini");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
   const preview =
