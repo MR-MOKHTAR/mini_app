@@ -135,11 +135,4 @@
   html {
     scroll-behavior: smooth;
   }
-
-  /* Better touch targets */
-  button,
-  [role="button"] {
-    min-height: 44px;
-    min-width: 44px;
-  }
 }
