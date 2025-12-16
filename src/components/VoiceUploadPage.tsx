@@ -213,32 +213,53 @@ export function VoiceUploadPage() {
   });
 
   return (
-    <div className="p-4 space-y-6 w-full max-w-5xl mx-auto">
+    <div className="p-4 pb-8 space-y-6 w-full max-w-5xl mx-auto">
       {/* فایل ورودی */}
-      <div className="shadow-lg border border-border/50 rounded-xl overflow-hidden">
-        <div className="p-6">
+      <div className="relative shadow-premium border border-border/30 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-glow">
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none"></div>
+
+        <div className="relative p-8">
           <label
             htmlFor="file-upload"
-            className={`flex flex-col items-center justify-center w-full h-40 border-2 rounded-2xl cursor-pointer transition-all duration-300 ${
+            className={`flex flex-col items-center justify-center w-full h-48 rounded-2xl cursor-pointer transition-all duration-500 relative overflow-hidden group ${
               audioFile
-                ? "border-green-400 bg-green-50/50 dark:bg-green-950/20 shadow-inner"
-                : "border-dashed border-border hover:border-primary/50 hover:bg-accent/20 hover:shadow-md"
+                ? "border-2 border-success bg-linear-to-br from-success/5 to-success/10 shadow-success"
+                : "border-2 border-dashed border-border hover:border-primary/70 hover:bg-linear-to-br hover:from-primary/5 hover:to-accent/5 hover:shadow-lg"
             }`}
           >
+            {/* Animated background */}
+            {!audioFile && (
+              <div className="absolute inset-0 bg-linear-to-r from-transparent via-primary/10 to-transparent opacity-0 group-hover:opacity-100 animate-shimmer"></div>
+            )}
+
             {audioFile ? (
-              <>
-                <Check className="w-10 h-10 mb-3 text-green-500 animate-in fade-in duration-300" />
-                <span className="text-sm font-medium text-green-700 dark:text-green-400">
-                  فایل انتخاب شد
+              <div className="relative z-10 text-center space-y-4 animate-in fade-in zoom-in duration-500">
+                <div className="relative">
+                  <Check className="w-16 h-16 text-success mx-auto animate-pulse" />
+                  <div className="absolute inset-0 w-16 h-16 mx-auto rounded-full bg-success/20 animate-ping"></div>
+                </div>
+                <span className="text-base font-bold text-success block">
+                  ✓ فایل با موفقیت انتخاب شد
                 </span>
-              </>
+                <span className="text-sm text-success/70">
+                  آماده برای ارسال
+                </span>
+              </div>
             ) : (
-              <>
-                <Upload className="w-10 h-10 mb-3 text-muted-foreground" />
-                <span className="text-sm font-medium text-center px-4">
-                  برای انتخاب فایل صوتی کلیک کنید
-                </span>
-              </>
+              <div className="relative z-10 text-center space-y-4">
+                <div className="relative">
+                  <Upload className="w-14 h-14 text-primary/70 mx-auto group-hover:scale-110 transition-transform duration-300" />
+                </div>
+                <div className="space-y-2">
+                  <span className="text-base font-semibold text-foreground block">
+                    انتخاب فایل صوتی
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    فایل خود را اینجا بکشید یا کلیک کنید
+                  </span>
+                </div>
+              </div>
             )}
           </label>
 
@@ -250,60 +271,97 @@ export function VoiceUploadPage() {
           />
 
           {audioFile && (
-            <div className="mt-4 flex items-center gap-3 text-sm bg-muted/50 p-3 rounded-xl">
-              <FileAudio className="w-5 h-5 text-primary" />
-              <span className="font-medium truncate">{audioFile.name}</span>
+            <div className="mt-6 flex items-center gap-4 text-sm bg-linear-to-r from-muted/30 to-muted/50 p-4 rounded-xl border border-border/30 shadow-sm animate-in slide-in-from-top-2 duration-300">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <FileAudio className="w-6 h-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <span className="font-semibold text-foreground block">
+                  {audioFile.name}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {(audioFile.size / 1024 / 1024).toFixed(2)} MB
+                </span>
+              </div>
             </div>
           )}
 
           <Button
-            className="w-full mt-6 h-12 text-base font-medium rounded-xl shadow-lg hover:shadow-sm hover:scale-[0.98] transition-all duration-200 bg-primary"
+            className="w-full mt-8 h-14 text-lg font-bold rounded-2xl relative overflow-hidden group"
+            variant="gradient"
+            size="lg"
             onClick={sendToGemini}
             disabled={!audioFile || loading}
           >
-            {loading ? "در حال ارسال..." : "ارسال به Gemini"}
+            {loading ? (
+              <span className="flex items-center gap-3">
+                <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
+                در حال پردازش...
+              </span>
+            ) : (
+              <span className="relative z-10">🚀 ارسال به Gemini</span>
+            )}
           </Button>
         </div>
       </div>
 
       {/* نتیجه */}
       {result && (
-        <div className="shadow-lg border border-border/50 rounded-xl overflow-hidden">
-          <div className="pb-4 px-6 pt-6 border-b border-border/30">
-            <h3 className="text-lg font-semibold">متن تبدیل شده</h3>
+        <div className="relative shadow-premium border border-border/30 rounded-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-linear-to-br from-accent/5 via-transparent to-primary/5 pointer-events-none"></div>
+
+          <div className="relative pb-6 px-8 pt-8 border-b border-border/30 bg-linear-to-r from-background/50 to-background">
+            <h3 className="text-2xl font-bold gradient-text">متن تبدیل شده</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              نتیجه رونویسی صوتی
+            </p>
           </div>
-          <div className="p-6">
-            <div className="flex flex-col gap-4">
-              <div className="whitespace-pre-wrap p-4 rounded-xl bg-muted/50 text-sm leading-relaxed border border-border/30 shadow-inner">
-                {preview}
+
+          <div className="relative p-8">
+            <div className="flex flex-col gap-5">
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-linear-to-r from-primary/20 to-accent/20 rounded-2xl opacity-0 group-hover:opacity-100 transition duration-500 blur"></div>
+                <div className="relative whitespace-pre-wrap p-6 rounded-2xl bg-linear-to-br from-muted/40 to-muted/60 text-base leading-loose border border-border/40 shadow-inner font-medium">
+                  {preview}
+                </div>
               </div>
 
               {/* Load More */}
               {result.length > 500 && (
                 <Button
-                  className="w-full h-11 rounded-xl border-2 hover:bg-accent/50 transition-colors"
+                  className="w-full h-12 rounded-xl font-semibold"
                   variant="outline"
                   onClick={() => setShowFull(!showFull)}
                 >
-                  {showFull ? "نمایش کمتر" : "نمایش بیشتر"}
+                  {showFull ? "🔼 نمایش کمتر" : "🔽 نمایش بیشتر"}
                 </Button>
               )}
 
               {/* Copy */}
               <Button
-                className="w-full h-11 rounded-xl shadow-md hover:shadow-sm hover:scale-[0.98] transition-all duration-200 bg-secondary"
+                variant="success"
+                size="lg"
+                className="w-full h-14 rounded-2xl text-lg font-bold"
                 onClick={() => {
                   copyText();
 
                   const toast = document.createElement("div");
-                  toast.textContent = "✔️ کپی شد";
+                  toast.textContent = "✓ متن با موفقیت کپی شد";
                   toast.className =
-                    "fixed bottom-6 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-2xl shadow-xl font-medium animate-in fade-in slide-in-from-bottom-4 duration-300";
+                    "fixed bottom-8 left-1/2 -translate-x-1/2 gradient-success text-white px-8 py-4 rounded-2xl shadow-glow font-bold text-lg animate-in fade-in slide-in-from-bottom-8 duration-500 z-50";
                   document.body.appendChild(toast);
-                  setTimeout(() => toast.remove(), 2000);
+                  setTimeout(() => {
+                    toast.classList.add(
+                      "animate-out",
+                      "fade-out",
+                      "slide-out-to-bottom-8"
+                    );
+                    setTimeout(() => toast.remove(), 300);
+                  }, 2000);
                 }}
               >
-                <Clipboard className="w-5 h-5 mr-2" /> کپی متن
+                <Clipboard className="w-6 h-6 mr-2" /> کپی متن
               </Button>
             </div>
           </div>

@@ -200,21 +200,36 @@ export function TextRewrite({ prompt, isRewrite }: PropType) {
   }
 
   return (
-    <div className="mt-6 shadow-lg border border-border/50 rounded-xl overflow-hidden">
+    <div className="relative mt-8 shadow-premium border border-border/30 rounded-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-linear-to-br from-secondary/5 via-transparent to-accent/5 pointer-events-none"></div>
+
       {/* Header */}
-      <div className="pb-4 px-6 pt-6 border-b border-border/30">
-        <h3 className="text-lg font-semibold">بازنویسی متن</h3>
+      <div className="relative pb-6 px-8 pt-8 border-b border-border/30 bg-linear-to-r from-background/50 to-background">
+        <h3 className="text-2xl font-bold gradient-text">بازنویسی متن</h3>
+        <p className="text-sm text-muted-foreground mt-1">
+          ویرایش تخصصی و علمی متن
+        </p>
       </div>
 
       {/* Body */}
-      <div className="p-6 flex flex-col gap-4">
+      <div className="relative p-8 flex flex-col gap-6">
         {/* متن */}
         <AnimatePresence>
           {loading ? (
-            <div className="space-y-3">
-              <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
-              <div className="h-4 w-4/5 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
-              <div className="h-4 w-3/5 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+            <div className="space-y-4">
+              <div className="relative overflow-hidden">
+                <div className="h-5 w-full bg-muted rounded-lg"></div>
+                <div className="absolute inset-0 -translate-x-full animate-shimmer"></div>
+              </div>
+              <div className="relative overflow-hidden">
+                <div className="h-5 w-11/12 bg-muted rounded-lg"></div>
+                <div className="absolute inset-0 -translate-x-full animate-shimmer"></div>
+              </div>
+              <div className="relative overflow-hidden">
+                <div className="h-5 w-9/12 bg-muted rounded-lg"></div>
+                <div className="absolute inset-0 -translate-x-full animate-shimmer"></div>
+              </div>
             </div>
           ) : (
             visibleText && (
@@ -222,9 +237,12 @@ export function TextRewrite({ prompt, isRewrite }: PropType) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="whitespace-pre-wrap p-4 rounded-xl bg-muted/50 text-sm leading-relaxed border border-border/30 shadow-inner"
+                className="relative group"
               >
-                {visibleText}
+                <div className="absolute -inset-1 bg-linear-to-r from-secondary/20 to-accent/20 rounded-2xl opacity-0 group-hover:opacity-100 transition duration-500 blur"></div>
+                <div className="relative whitespace-pre-wrap p-6 rounded-2xl bg-linear-to-br from-secondary/10 to-muted/60 text-base leading-loose border border-border/40 shadow-inner font-medium">
+                  {visibleText}
+                </div>
               </motion.div>
             )
           )}
@@ -233,18 +251,21 @@ export function TextRewrite({ prompt, isRewrite }: PropType) {
         {/* دکمه نمایش بیشتر */}
         {!loading && fullText.length > visibleText.length && (
           <Button
-            className="w-full h-12 rounded-2xl border-2 border-primary/20 hover:border-primary/50 bg-background hover:bg-accent/30 text-primary font-medium transition-all duration-300 shadow-sm hover:shadow-md"
+            className="w-full h-13 rounded-2xl font-semibold text-base"
             variant="outline"
             onClick={loadMore}
           >
-            نمایش بیشتر ({fullText.length - visibleText.length} کاراکتر مانده)
+            📖 نمایش بیشتر ({fullText.length - visibleText.length} کاراکتر
+            مانده)
           </Button>
         )}
 
         {/* دکمه کپی */}
         {!loading && fullText.length > 0 && (
           <Button
-            className="w-full h-12 rounded-2xl shadow-md hover:shadow-sm hover:scale-[0.98] transition-all duration-300 font-bold text-base border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-950/50"
+            variant="gradient"
+            size="lg"
+            className="w-full h-14 rounded-2xl text-lg font-bold shadow-glow"
             onClick={copyText}
           >
             📋 کپی تمام متن
