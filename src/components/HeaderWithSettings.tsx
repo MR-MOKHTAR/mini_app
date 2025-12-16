@@ -1,21 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Settings, Menu as MenuIcon } from "lucide-react";
-import {
-  Button,
-  Dialog,
-  Input,
-  IconButton,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import { Settings, X } from "lucide-react";
 
 import { ModelSelector } from "./ModelSelector";
+import { Button } from "@/components/ui/button";
 
 export default function HeaderWithSettings() {
   const [open, setOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [error, setError] = useState("");
 
@@ -31,96 +23,73 @@ export default function HeaderWithSettings() {
   }
 
   return (
-    <>
+    <header className="shadow-sm p-1.5">
       {/* Header */}
-      <header className="flex items-center justify-between p-4 border-b border-border/50 bg-background/95 backdrop-blur-md sticky top-0 z-50 shadow-sm h-14 md:h-16">
-        <IconButton
-          variant="surface"
-          colorPalette="gray"
-          size={{ base: "sm", md: "md" }}
-          className="rounded-xl shadow-sm border border-border/40 active:scale-95 transition-transform"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
+      <div className="flex items-center justify-between">
+        <button
+          className="bg-gray-200/50 rounded-lg flex items-center justify-center p-2 hover:bg-gray-200/70 transition-colors"
+          onClick={() => setOpen(true)}
         >
-          <MenuIcon className="size-5" />
-        </IconButton>
+          <Settings size={18} />
+        </button>
+        <ModelSelector />
+      </div>
 
-        <div className="flex items-center gap-2 md:gap-3">
-          <ModelSelector />
-          <IconButton
-            variant="surface"
-            colorPalette="gray"
-            size={{ base: "sm", md: "md" }}
-            onClick={() => setOpen(true)}
-            className="rounded-xl shadow-sm border border-border/40 active:scale-95 transition-transform"
-          >
-            <Settings className="size-5" />
-          </IconButton>
-        </div>
-      </header>
+      {/* Settings Dialog/Modal */}
+      {open && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/60 z-40"
+            onClick={() => setOpen(false)}
+          />
 
-      <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
-        <Dialog.Backdrop bg="blackAlpha.600" className="backdrop-blur-sm" />
+          {/* Modal Content */}
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div
+              className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md shadow-xl"
+              dir="rtl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="pb-3 border-b border-gray-200 dark:border-gray-700 mb-4">
+                <h2 className="text-xl font-semibold text-center">
+                  تنظیمات API
+                </h2>
+              </div>
 
-        <Dialog.Positioner zIndex="popover">
-          <Dialog.Content
-            maxW={{ base: "90vw", sm: "xs", md: "sm" }}
-            p={{ base: "6", md: "8" }}
-            borderRadius="3xl"
-            boxShadow="2xl"
-            bg="bg"
-            border="1px solid"
-            borderColor="border"
-            zIndex="popover"
-            dir="rtl"
-            className="mx-4"
-          >
-            <Dialog.Header pb="4">
-              <Dialog.Title className="text-lg font-semibold text-center">
-                تنظیمات API
-              </Dialog.Title>
-            </Dialog.Header>
-
-            <Dialog.Body pt="2" pb="8">
-              <Stack gap="4">
-                <Input
+              {/* Body */}
+              <div className="flex flex-col gap-3">
+                <input
+                  type="text"
                   placeholder="کلید Gemini..."
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
-                  size="lg"
-                  variant="outline"
-                  borderRadius="xl"
-                  className="focus:ring-2 focus:ring-primary/20"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 {error && (
-                  <Text
-                    color="destructive"
-                    fontSize="sm"
-                    className="text-center"
-                  >
-                    {error}
-                  </Text>
+                  <p className="text-red-500 text-sm text-center">{error}</p>
                 )}
-              </Stack>
-            </Dialog.Body>
+              </div>
 
-            <Dialog.Footer pt="0">
-              <Button
-                colorPalette="blue"
-                variant="solid"
-                onClick={saveKey}
-                w="full"
-                size="lg"
-                borderRadius="xl"
-                className="shadow-lg hover:shadow-xl transition-all duration-200"
+              {/* Footer */}
+              <div className="mt-6">
+                <Button onClick={saveKey} className="w-full rounded-lg">
+                  ذخیره کلید
+                </Button>
+              </div>
+
+              {/* Close Button */}
+              <button
+                onClick={() => setOpen(false)}
+                className="absolute top-4 left-4 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
-                ذخیره کلید
-              </Button>
-            </Dialog.Footer>
-
-            <Dialog.CloseTrigger className="absolute top-4 left-4" />
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Dialog.Root>
-    </>
+                <X size={20} />
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </header>
   );
 }

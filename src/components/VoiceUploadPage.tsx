@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Button, Card, Box, VStack } from "@chakra-ui/react";
 import { Upload, FileAudio, Clipboard, Check } from "lucide-react";
 import { TextRewrite } from "./TextRewrite";
 import { useModel } from "@/context/ModelContext";
+import { Button } from "@/components/ui/button";
 
 const transcriptionPrompt = `
       You are an expert transcriber specializing in accurate speech-to-text conversion.
@@ -56,69 +56,143 @@ export function VoiceUploadPage() {
     localStorage.removeItem("MAIN_TEXT");
     localStorage.removeItem("REWRITE_TEXT");
 
-    try {
-      const apiKey = localStorage.getItem("GEMINI_API_KEY");
-      if (!apiKey) {
-        setResult("❌ ابتدا API Key را وارد کنید.");
-        return;
-      }
+    const maxRetries = 3;
+    let retryCount = 0;
 
-      // تبدیل فایل صوتی به base64 (بدون تغییر)
-      const fileBase64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve((reader.result as string).split(",")[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(audioFile);
-      });
+    async function attemptRequest(): Promise<void> {
+      try {
+        if (!audioFile) {
+          setResult("❌ فایل صوتی انتخاب نشده است.");
+          return;
+        }
 
-      // ⬅️ URL صحیح Gemini (مهم‌ترین تغییر)
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model.value}:generateContent?key=${apiKey}`;
+        const apiKey = localStorage.getItem("GEMINI_API_KEY");
+        if (!apiKey) {
+          setResult("❌ ابتدا API Key را وارد کنید.");
+          return;
+        }
 
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [
-                {
-                  inlineData: {
-                    mimeType: audioFile.type,
-                    data: fileBase64,
+        // تبدیل فایل صوتی به base64 (بدون تغییر)
+        const fileBase64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () =>
+            resolve((reader.result as string).split(",")[1]);
+          reader.onerror = reject;
+          reader.readAsDataURL(audioFile);
+        });
+
+        // ⬅️ URL صحیح Gemini (مهم‌ترین تغییر)
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model.value}:generateContent?key=${apiKey}`;
+
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                role: "user",
+                parts: [
+                  {
+                    inlineData: {
+                      mimeType: audioFile.type,
+                      data: fileBase64,
+                    },
                   },
-                },
-                { text: transcriptionPrompt },
-              ],
-            },
-          ],
-        }),
-      });
+                  { text: transcriptionPrompt },
+                ],
+              },
+            ],
+          }),
+        });
 
-      if (!response.ok) {
-        const err = await response.text();
-        throw new Error(err);
+        if (!response.ok) {
+          const errorText = await response.text();
+          let errorData;
+          try {
+            errorData = JSON.parse(errorText);
+          } catch {
+            throw new Error(errorText);
+          }
+
+          const status = response.status;
+          const errorMessage = errorData?.error?.message || "خطای ناشناخته";
+
+          // Handle 503 - Model Overloaded
+          if (status === 503) {
+            if (retryCount < maxRetries) {
+              retryCount++;
+              const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 2s, 4s, 8s
+              setResult(
+                `⏳ سرور مشغول است. تلاش ${retryCount} از ${maxRetries}...\nتلاش مجدد در ${
+                  delay / 1000
+                } ثانیه...`
+              );
+              await new Promise((resolve) => setTimeout(resolve, delay));
+              return attemptRequest();
+            } else {
+              setResult(
+                "❌ سرور Gemini در حال حاضر بسیار شلوغ است.\n\n💡 لطفاً چند دقیقه بعد مجدداً تلاش کنید."
+              );
+              return;
+            }
+          }
+
+          // Handle 429 - Quota Exceeded
+          if (status === 429) {
+            setResult(
+              "❌ محدودیت استفاده از API به پایان رسیده است.\n\n💡 لطفاً بعداً تلاش کنید یا API Key دیگری استفاده نمایید."
+            );
+            return;
+          }
+
+          // Handle 400 - Invalid Argument
+          if (status === 400) {
+            setResult(
+              `❌ خطا در درخواست:\n${errorMessage}\n\n💡 لطفاً از صحت تنظیمات مدل اطمینان حاصل کنید.`
+            );
+            return;
+          }
+
+          // Handle 403 - Permission Denied
+          if (status === 403) {
+            setResult(
+              "❌ دسترسی رد شد. API Key معتبر نیست.\n\n💡 لطفاً API Key خود را بررسی کنید."
+            );
+            return;
+          }
+
+          // Other errors
+          throw new Error(`خطا ${status}: ${errorMessage}`);
+        }
+
+        const data = await response.json();
+        console.log("Gemini response:", data);
+
+        const text =
+          data?.candidates?.[0]?.content?.parts
+            ?.map((p: any) => p.text)
+            ?.join("") || "";
+
+        setResult(text || "❌ پاسخ معتبر نبود.");
+
+        if (text) {
+          localStorage.setItem("MAIN_TEXT", text);
+          setIsRewrite(true);
+        }
+      } catch (err) {
+        console.error(err);
+        setResult(
+          `❌ خطا در ارسال به Gemini:\n${
+            err instanceof Error ? err.message : "خطای ناشناخته"
+          }`
+        );
       }
+    }
 
-      const data = await response.json();
-      console.log("Gemini response:", data);
-
-      const text =
-        data?.candidates?.[0]?.content?.parts
-          ?.map((p: any) => p.text)
-          ?.join("") || "";
-
-      setResult(text || "❌ پاسخ معتبر نبود.");
-
-      if (text) {
-        localStorage.setItem("MAIN_TEXT", text);
-        setIsRewrite(true);
-      }
-    } catch (err) {
-      console.error(err);
-      setResult("❌ خطا در ارسال به Gemini");
+    try {
+      await attemptRequest();
     } finally {
       setLoading(false);
     }
@@ -141,14 +215,14 @@ export function VoiceUploadPage() {
   return (
     <div className="p-4 space-y-6 w-full max-w-5xl mx-auto">
       {/* فایل ورودی */}
-      <Card.Root variant="outline" className="shadow-lg border-border/50">
-        <Card.Body className="p-6">
+      <div className="shadow-lg border border-border/50 rounded-xl overflow-hidden">
+        <div className="p-6">
           <label
             htmlFor="file-upload"
             className={`flex flex-col items-center justify-center w-full h-40 border-2 rounded-2xl cursor-pointer transition-all duration-300 ${
               audioFile
                 ? "border-green-400 bg-green-50/50 dark:bg-green-950/20 shadow-inner"
-                : "border-dashed border-border active:border-primary/50 active:bg-accent/20 active:shadow-md"
+                : "border-dashed border-border hover:border-primary/50 hover:bg-accent/20 hover:shadow-md"
             }`}
           >
             {audioFile ? (
@@ -183,33 +257,31 @@ export function VoiceUploadPage() {
           )}
 
           <Button
-            className="w-full mt-6 h-12 text-base font-medium rounded-xl shadow-lg active:shadow-sm active:scale-[0.98] transition-all duration-200 bg-primary"
+            className="w-full mt-6 h-12 text-base font-medium rounded-xl shadow-lg hover:shadow-sm hover:scale-[0.98] transition-all duration-200 bg-primary"
             onClick={sendToGemini}
             disabled={!audioFile || loading}
           >
             {loading ? "در حال ارسال..." : "ارسال به Gemini"}
           </Button>
-        </Card.Body>
-      </Card.Root>
+        </div>
+      </div>
 
       {/* نتیجه */}
       {result && (
-        <Card.Root variant="outline" className="shadow-lg border-border/50">
-          <Card.Header className="pb-4">
-            <Card.Title className="text-lg font-semibold">
-              متن تبدیل شده
-            </Card.Title>
-          </Card.Header>
-          <Card.Body className="pt-2">
-            <VStack gap="4" align="stretch">
-              <Box className="whitespace-pre-wrap p-4 rounded-xl bg-muted/50 text-sm leading-relaxed border border-border/30 shadow-inner">
+        <div className="shadow-lg border border-border/50 rounded-xl overflow-hidden">
+          <div className="pb-4 px-6 pt-6 border-b border-border/30">
+            <h3 className="text-lg font-semibold">متن تبدیل شده</h3>
+          </div>
+          <div className="p-6">
+            <div className="flex flex-col gap-4">
+              <div className="whitespace-pre-wrap p-4 rounded-xl bg-muted/50 text-sm leading-relaxed border border-border/30 shadow-inner">
                 {preview}
-              </Box>
+              </div>
 
               {/* Load More */}
               {result.length > 500 && (
                 <Button
-                  className="w-full h-11 rounded-xl border-2 active:bg-accent/50 transition-colors"
+                  className="w-full h-11 rounded-xl border-2 hover:bg-accent/50 transition-colors"
                   variant="outline"
                   onClick={() => setShowFull(!showFull)}
                 >
@@ -219,8 +291,7 @@ export function VoiceUploadPage() {
 
               {/* Copy */}
               <Button
-                className="w-full h-11 rounded-xl shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-200 bg-secondary"
-                variant="subtle"
+                className="w-full h-11 rounded-xl shadow-md hover:shadow-sm hover:scale-[0.98] transition-all duration-200 bg-secondary"
                 onClick={() => {
                   copyText();
 
@@ -234,9 +305,9 @@ export function VoiceUploadPage() {
               >
                 <Clipboard className="w-5 h-5 mr-2" /> کپی متن
               </Button>
-            </VStack>
-          </Card.Body>
-        </Card.Root>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* بازنویسی خودکار */}
