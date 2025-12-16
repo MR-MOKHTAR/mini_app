@@ -63,30 +63,48 @@ export function TextRewrite({ prompt, isRewrite }: PropType) {
     }
 
     try {
-      const response = await fetch(
-        `/api/gemini?model=${model.value}&key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [{ text: baseCorrectionPrompt }],
-              },
-            ],
-          }),
-        }
-      );
+      const apiKey = localStorage.getItem("GEMINI_API_KEY");
+      if (!apiKey) {
+        setFullText("❌ API Key موجود نیست.");
+        setVisibleText("❌ API Key موجود نیست.");
+        return;
+      }
+
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model.value}:generateContent?key=${apiKey}`;
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: baseCorrectionPrompt }],
+            },
+          ],
+        }),
+      });
+
+      if (!response.ok) {
+        const err = await response.text();
+        throw new Error(err);
+      }
 
       const data = await response.json();
-      const output: string =
-        data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-        "❌ بازنویسی معتبر نبود.";
+      console.log("Gemini rewrite response:", data);
+
+      const output =
+        data?.candidates?.[0]?.content?.parts
+          ?.map((p: any) => p.text)
+          ?.join("") || "❌ بازنویسی معتبر نبود.";
 
       setFullText(output);
       setVisibleText(output.slice(0, showCount));
       localStorage.setItem("REWRITE_TEXT", output);
-    } catch {
+    } catch (err) {
+      console.error(err);
       setFullText("❌ خطا در بازنویسی متن.");
       setVisibleText("❌ خطا در بازنویسی متن.");
     }
