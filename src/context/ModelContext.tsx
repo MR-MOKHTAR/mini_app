@@ -6,7 +6,7 @@ export type ModelOption = {
 };
 
 export const AI_MODELS: ModelOption[] = [
-  { label: "Gemini 3 Flash", value: "gemini-3-flash" },
+  { label: "Gemini 3 Flash", value: "gemini-3-flash-preview" },
   { label: "Gemini 2.5 Flash", value: "gemini-2.5-flash" },
   { label: "Gemini 2.5 Flash Lite", value: "gemini-2.5-flash-lite" },
 ];
