@@ -1,14 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Upload,
-  FileAudio,
-  Clipboard,
-  Check,
-  History,
-  X,
-  Trash2,
-  Clock,
-} from "lucide-react";
+import { Upload, FileAudio, Clipboard } from "lucide-react";
 import { useModel } from "@/context/ModelContext";
 import { Button } from "@/components/ui/button";
 
@@ -64,24 +55,11 @@ export function VoiceUploadPage() {
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
   const [showFull, setShowFull] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
-  const [history, setHistory] = useState<HistoryItem[]>([]);
 
   const { model } = useModel();
 
-  // Load history from localStorage on mount
-
+  // Load current result from localStorage on mount
   useEffect(() => {
-    const savedHistory = localStorage.getItem("TRANSCRIPTION_HISTORY");
-    if (savedHistory) {
-      try {
-        setHistory(JSON.parse(savedHistory));
-      } catch (e) {
-        console.error("Error loading history:", e);
-      }
-    }
-
-    // Load current result
     const getMainText = localStorage.getItem("MAIN_TEXT");
     if (getMainText) {
       setResult(getMainText);
@@ -97,11 +75,20 @@ export function VoiceUploadPage() {
         timestamp: Date.now(),
       };
 
-      setHistory((prev) => {
-        const updated = [newItem, ...prev].slice(0, 10); // Keep only last 10 items
-        localStorage.setItem("TRANSCRIPTION_HISTORY", JSON.stringify(updated));
-        return updated;
-      });
+      // Get existing history
+      const savedHistory = localStorage.getItem("TRANSCRIPTION_HISTORY");
+      let history: HistoryItem[] = [];
+      if (savedHistory) {
+        try {
+          history = JSON.parse(savedHistory);
+        } catch (e) {
+          console.error("Error loading history:", e);
+        }
+      }
+
+      // Add new item and keep only last 10
+      const updated = [newItem, ...history].slice(0, 10);
+      localStorage.setItem("TRANSCRIPTION_HISTORY", JSON.stringify(updated));
     }
   }, [result]);
 
@@ -274,39 +261,6 @@ export function VoiceUploadPage() {
     navigator.clipboard.writeText(result);
   }
 
-  function loadFromHistory(item: HistoryItem) {
-    setResult(item.text);
-    setShowHistory(false);
-  }
-
-  function deleteFromHistory(id: string) {
-    setHistory((prev) => {
-      const updated = prev.filter((item) => item.id !== id);
-      localStorage.setItem("TRANSCRIPTION_HISTORY", JSON.stringify(updated));
-      return updated;
-    });
-  }
-
-  function clearHistory() {
-    setHistory([]);
-    localStorage.removeItem("TRANSCRIPTION_HISTORY");
-  }
-
-  function formatDate(timestamp: number): string {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return "همین الان";
-    if (diffMins < 60) return `${diffMins} دقیقه پیش`;
-    if (diffHours < 24) return `${diffHours} ساعت پیش`;
-    if (diffDays < 7) return `${diffDays} روز پیش`;
-    return date.toLocaleDateString("fa-IR");
-  }
-
   return (
     <div className="p-2 sm:p-4 pb-8 space-y-4 sm:space-y-6 w-full max-w-5xl mx-auto">
       {/* فایل ورودی */}
@@ -331,8 +285,21 @@ export function VoiceUploadPage() {
             {audioFile ? (
               <div className="relative z-10 text-center space-y-3 sm:space-y-4 animate-in fade-in zoom-in duration-500">
                 <div className="relative">
-                  <Check className="w-12 h-12 sm:w-16 sm:h-16 text-success mx-auto animate-pulse" />
-                  <div className="absolute inset-0 w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-full bg-success/20 animate-ping"></div>
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-full bg-success/20 flex items-center justify-center">
+                    <svg
+                      className="w-6 h-6 sm:w-8 sm:h-8 text-success"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
                 </div>
                 <span className="text-sm sm:text-base font-bold text-success block">
                   ✓ فایل با موفقیت انتخاب شد
@@ -408,23 +375,13 @@ export function VoiceUploadPage() {
           <div className="absolute inset-0 bg-linear-to-br from-accent/5 via-transparent to-primary/5 pointer-events-none"></div>
 
           <div className="relative pb-4 sm:pb-6 px-3 sm:px-6 md:px-8 pt-4 sm:pt-6 md:pt-8 border-b border-border/30 bg-linear-to-r from-background/50 to-background">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <h3 className="text-lg sm:text-xl md:text-2xl font-bold gradient-text">
-                  متن تبدیل شده
-                </h3>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">
-                  نتیجه رونویسی صوتی
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="shrink-0"
-                onClick={() => setShowHistory(!showHistory)}
-              >
-                <History className="w-4 h-4 sm:w-5 sm:h-5" />
-              </Button>
+            <div>
+              <h3 className="text-lg sm:text-xl md:text-2xl font-bold gradient-text">
+                متن تبدیل شده
+              </h3>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">
+                نتیجه رونویسی صوتی
+              </p>
             </div>
           </div>
 
@@ -473,98 +430,6 @@ export function VoiceUploadPage() {
               >
                 <Clipboard className="w-5 h-5 sm:w-6 sm:h-6 mr-2" /> کپی متن
               </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* History Panel */}
-      {showHistory && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setShowHistory(false)}
-          ></div>
-          <div className="relative w-full sm:max-w-2xl max-h-[80vh] bg-background rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-4 duration-300">
-            {/* Header */}
-            <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border/30 p-4 sm:p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-primary/10">
-                    <History className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg sm:text-xl font-bold">
-                      سابقه تبدیل‌ها
-                    </h3>
-                    <p className="text-xs sm:text-sm text-muted-foreground">
-                      {history.length} مورد ذخیره شده
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {history.length > 0 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={clearHistory}
-                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                    >
-                      <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </Button>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowHistory(false)}
-                  >
-                    <X className="w-5 h-5 sm:w-6 sm:h-6" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="overflow-y-auto max-h-[60vh] sm:max-h-[60vh] p-3 sm:p-4 space-y-2 sm:space-y-3">
-              {history.length === 0 ? (
-                <div className="text-center py-8 sm:py-12">
-                  <Clock className="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground/30 mx-auto mb-4" />
-                  <p className="text-sm sm:text-base text-muted-foreground">
-                    هنوز هیچ تبدیلی انجام نشده است
-                  </p>
-                </div>
-              ) : (
-                history.map((item) => (
-                  <div
-                    key={item.id}
-                    className="group relative p-3 sm:p-4 rounded-xl border border-border/30 bg-muted/30 hover:bg-muted/50 transition-all duration-200 cursor-pointer"
-                    onClick={() => loadFromHistory(item)}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs sm:text-sm text-muted-foreground mb-2 flex items-center gap-2">
-                          <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-                          {formatDate(item.timestamp)}
-                        </p>
-                        <p className="text-sm sm:text-base text-foreground line-clamp-2 sm:line-clamp-3 leading-relaxed">
-                          {item.text}
-                        </p>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteFromHistory(item.id);
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </div>
-                ))
-              )}
             </div>
           </div>
         </div>
