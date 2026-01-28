@@ -69,6 +69,8 @@ export function VoiceUploadPage() {
 
   const { model } = useModel();
 
+  // Load history from localStorage on mount
+
   useEffect(() => {
     const savedHistory = localStorage.getItem("TRANSCRIPTION_HISTORY");
     if (savedHistory) {
