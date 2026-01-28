@@ -361,6 +361,7 @@ export function VoiceUploadPage() {
           <input
             id="file-upload"
             type="file"
+            accept=".mp3,.wav,.ogg,.m4a"
             className="hidden"
             onChange={handleFileSelect}
           />
